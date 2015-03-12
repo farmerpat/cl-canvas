@@ -1,0 +1,5 @@
+*.log
+*.txt
+*.swp
+*.tern*
+scratch.lisp
