@@ -10,19 +10,12 @@
 ;;     (we probably dont even need defgeneric to allow this macro)
 ;;
 
-;; so tired of typing this out...not sure about the name tho
 ;; setclass
 (defmacro setc (sym class)
   `(setf ,sym (make-instance ',class)))
 
 (defmacro mi (class)
   `(make-instance ',class))
-
-;; destructively string append
-(defmacro setsap (place content)
-  `(setf ,place (concatenate 'string
-                             ,place
-                             ,content)))
 
 (defun can-line (line)
   (format nil "~A~%" line))
@@ -41,22 +34,17 @@
            :accessor get-height)))
 
 (defmethod canvas-area-spec-string ((c canvas))
-  (let ((str "")
-        (width (write-to-string (get-width c)))
+  (let ((width (write-to-string (get-width c)))
         (height (write-to-string (get-height c))))
-    (setsap str (can-line "var canvas = document.getElementById('canvas');"))
-    (setsap str "canvas.width='")
-    (setsap str width)
-    (setsap str (can-line "';"))
-    (setsap str "canvas.height='")
-    (setsap str height)
-    (setsap str (can-line "';"))))
+    (with-output-to-string (str)
+      (format str "var canvas = document.getElementById('canvas');~%")
+      (format str "canvas.width='~A';~%" width)
+      (format str "canvas.height='~A';~%" height))))
 
 (defmethod canvas-to-string ((c canvas))
-  (let ((str ""))
-    (setsap str (can-line (canvas-area-spec-string c)))
-    (setsap str (can-line (context-to-string (get-context c))))
-    str))
+  (with-output-to-string (str)
+    (format str "~A~%" (canvas-area-spec-string c))
+    (format str "~A~%" (context-to-string (get-context c)))))
 
 (defmethod add-to-context ((c canvas) element)
   (add-to-context (get-context c) element))
@@ -65,10 +53,8 @@
   ())
 
 (defmethod context-to-string ((c context))
-  (let ((str ""))
-    (setf str (concatenate 'string
-                           (can-line "var context = canvas.getContext('2d');")))
-    str))
+  (with-output-to-string (str)
+    (format str "var context = canvas.getContext('2d');~%")))
 
 (defmethod add-text-to-context ((c context) (t can-text))
   )
@@ -87,7 +73,5 @@
                 :initform "lorem ipsum"
                 :accessor get-text)))
 
-;; unify all of these to-strings with defgeneric
-;; for good happy success???
 (defmethod can-text-to-string ((t can-text))
   )
