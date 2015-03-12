@@ -4,6 +4,8 @@
 ;; see http://www.html5canvastutorials.com/tutorials/ for functionality to offer
 ;;
 ;; TODO
+;;   - add README.md
+;;   - allow &rest args for add-to-context
 ;;   - add docstrings
 ;;   - defgeneric for to-strings??
 ;;     (allowing (with-canvas-string ...))
@@ -11,8 +13,8 @@
 ;;
 
 ;; setclass
-(defmacro setc (sym class)
-  `(setf ,sym (make-instance ',class)))
+(defmacro setc (sym class &rest initargs)
+  `(setf ,sym (make-instance ',class ,@initargs)))
 
 (defmacro mi (class)
   `(make-instance ',class))
@@ -50,17 +52,22 @@
   (add-to-context (get-context c) element))
 
 (defclass context ()
-  ())
+  ((elements :initarg :elements
+             :initform (make-array 0 :fill-pointer 0 :adjustable t)
+             :accessor get-elements)))
+
+(defmethod add-to-context ((c context) elt)
+  (vector-push-extend elt (get-elements c)))
+
+(defmethod pop-context ((c context))
+  (let ((elts (get-elements c)))
+    (if (zerop (length elts))
+        (format t "POP-CONTEXT refuses to pop...the context vector is empty~%")
+        (vector-pop (get-elements c)))))
 
 (defmethod context-to-string ((c context))
   (with-output-to-string (str)
     (format str "var context = canvas.getContext('2d');~%")))
-
-(defmethod add-text-to-context ((c context) (t can-text))
-  )
-
-(defmethod add-to-context ((c context) element)
-  )
 
 (defclass can-text ()
   ((font-pt :initarg :font-pt
@@ -73,5 +80,5 @@
                 :initform "lorem ipsum"
                 :accessor get-text)))
 
-(defmethod can-text-to-string ((t can-text))
+(defmethod can-text-to-string ((ct can-text))
   )
