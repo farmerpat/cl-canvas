@@ -27,6 +27,8 @@
 (defun can-line (line)
   (format nil "~A~%" line))
 
+(defgeneric add-to-context (class-or-context element))
+
 (defclass canvas ()
   ((context :initarg :context
             :initform (mi context)
@@ -56,6 +58,9 @@
     (setsap str (can-line (context-to-string (get-context c))))
     str))
 
+(defmethod add-to-context ((c canvas) element)
+  (add-to-context (get-context c) element))
+
 (defclass context ()
   ())
 
@@ -66,6 +71,9 @@
     str))
 
 (defmethod add-text-to-context ((c context) (t can-text))
+  )
+
+(defmethod add-to-context ((c context) element)
   )
 
 (defclass can-text ()
