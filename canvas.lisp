@@ -7,7 +7,9 @@
 ;;   - add README.md
 ;;   - allow &rest args for add-to-context
 ;;   - add docstrings
-;;   - defgeneric for to-strings??
+;;   - add error checking to class inits (e.g. (member given-weight '("bold" "normal" "italic")))
+;;   - integrate global *fill-color* for default or override?
+;;   - add stroke-color to can-text?
 ;;     (allowing (with-canvas-string ...))
 ;;     (we probably dont even need defgeneric to allow this macro)
 ;;
@@ -23,6 +25,7 @@
   (format nil "~A~%" line))
 
 (defgeneric add-to-context (class-or-context element))
+(defgeneric element-to-string (elt))
 
 (defclass canvas ()
   ((context :initarg :context
@@ -67,18 +70,48 @@
 
 (defmethod context-to-string ((c context))
   (with-output-to-string (str)
-    (format str "var context = canvas.getContext('2d');~%")))
+    (format str "var context = canvas.getContext('2d');~%")
+    (loop for elt being the elements of (get-elements c)
+       do
+         (format str "~A~%" (element-to-string elt)))))
 
 (defclass can-text ()
   ((font-pt :initarg :font-pt
             :initform 12
             :accessor get-font-pt)
    (font-family :initarg :font-familiy
-                :initform "Courier New"
+                :initform "Courier"
                 :accessor get-font-family)
+   (weight :initarg :weight
+           :initform "normal"
+           :accessor get-font-weight)
+   (color :initarg :color
+          :initform "black"
+          :accessor get-font-color)
    (text        :initarg :text
                 :initform "lorem ipsum"
-                :accessor get-text)))
+                :accessor get-text)
+   (x-pos :initarg :x-pos
+          :initform 0
+          :accessor get-x-pos)
+   (y-pos :initarg :y-pos
+          :initform 0
+          :accessor get-y-pos)))
 
-(defmethod can-text-to-string ((ct can-text))
-  )
+(defmethod build-font-string ((ct can-text))
+  (with-output-to-string (str)
+    (format str "~A " (get-font-weight ct))
+    (format str "~Apt " (get-font-pt ct))
+    (format str "~A" (get-font-family ct))))
+
+(defmethod build-fill-text-params ((ct can-text))
+  (with-output-to-string (str)
+    (format str "'~A', " (get-text ct))
+    (format str "~A, " (get-x-pos ct))
+    (format str "~A" (get-y-pos ct))))
+
+(defmethod element-to-string ((ct can-text))
+  (with-output-to-string (str)
+    (format str "context.fillStyle = '~A';~%" (get-font-color ct))
+    (format str "context.font = '~A';~%" (build-font-string ct))
+    (format str "context.fillText(~A);~%" (build-fill-text-params ct))))
