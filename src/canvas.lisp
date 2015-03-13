@@ -80,7 +80,7 @@
   ((font-pt :initarg :font-pt
             :initform 12
             :accessor get-font-pt)
-   (font-family :initarg :font-familiy
+   (font-family :initarg :font-family
                 :initform "Courier"
                 :accessor get-font-family)
    (weight :initarg :weight

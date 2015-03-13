@@ -8,7 +8,7 @@
 (defsystem :cl-canvas
   :version "0.0.1"
   :author "Patrick Connelly"
-  :depends-on ("clack" "cl-who")
+  :depends-on ("clack" "cl-who" "cl-ppcre")
   :serial t
   :components ((:module "src"
                         :components

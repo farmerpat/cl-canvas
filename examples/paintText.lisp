@@ -8,11 +8,20 @@
 (in-package :cl-canvas-example)
 
 (defvar *server* nil)
-(defvar *test-root-path* *default-pathname-defaults*)
 (setf (cl-who:html-mode) :html5)
 
-(setf can (make-instance 'canvas :context (make-instance 'context)))
-(add-to-context can (make-instance 'can-text :text "make me do something interesting"))
+(setf can (make-instance 'canvas :width 400 :context (make-instance 'context)))
+(add-to-context can (make-instance 'can-text
+                                   :text "make me do something interesting"
+                                   :font-family "Verdana"))
+
+(defun get-public-path ()
+  (let ((path-string
+         (cl-ppcre:regex-replace
+          "\/cl-canvas\/.*"
+          (namestring *default-pathname-defaults*)
+          "/cl-canvas/examples/public/")))
+    (pathname path-string)))
 
 (defun index (env)
   `(200
@@ -25,16 +34,14 @@
           (:div :id "container"
                 (:canvas :id "canvas")
                 (:script
-                 (str (canvas-to-string can)))
-                (:script
-                 "console.log('der');"))))))))
+                 (str (canvas-to-string can))))))))))
 
 (defun start-server ()
   (setf *server* (clack:clackup
                   (clack.builder:builder
                    (clack.middleware.static:<clack-middleware-static>
                     :path "/public/"
-                    :root (merge-pathnames "public/" *test-root-path*))
+                    :root (get-public-path))
                    #'index))))
 
 (defun stop-server ()
