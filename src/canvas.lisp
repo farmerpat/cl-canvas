@@ -13,10 +13,6 @@
 ;;     (allowing (with-canvas-string ...))
 ;;     (we probably dont even need defgeneric to allow this macro)
 ;;
-
-(defpackage :cl-canvas
-  (:use :cl))
-
 (in-package :cl-canvas)
 
 ;; setclass
