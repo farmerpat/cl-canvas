@@ -72,7 +72,7 @@
 (defmethod context-to-string ((c context))
   (with-output-to-string (str)
     (format str "var context = canvas.getContext('2d');~%")
-    (loop for elt being the elements of (get-elements c)
+    (loop for elt across (get-elements c)
        do
          (format str "~A~%" (element-to-string elt)))))
 
@@ -93,10 +93,10 @@
                 :initform "lorem ipsum"
                 :accessor get-text)
    (x-pos :initarg :x-pos
-          :initform 0
+          :initform 30
           :accessor get-x-pos)
    (y-pos :initarg :y-pos
-          :initform 0
+          :initform 30
           :accessor get-y-pos)))
 
 (defmethod build-font-string ((ct can-text))
