@@ -1,7 +1,7 @@
-;; paints a string to the canvas
+;; paints a line to the canvas
 ;;
 ;; Usage (following (asdf:operate 'asdf:load-op :cl-canvas))
-;;   (in-package :cl-canvas-text-example)
+;;   (in-package :cl-canvas-line-example)
 ;;   (start-server)
 ;;   visit localhost:5000
 ;;
@@ -10,19 +10,19 @@
 
 (in-package :cl-canvas-example)
 
-(defpackage cl-canvas-text-example
+(defpackage cl-canvas-line-example
   (:use :cl :cl-canvas :cl-canvas-example :clack :cl-who :cl-ppcre))
 
-(in-package :cl-canvas-text-example)
+(in-package :cl-canvas-line-example)
 
 (defvar *server* nil)
 (setf (cl-who:html-mode) :html5)
 
 (setc can canvas :width 400 :context (mi context))
-(add-to-context can (make-instance 'can-text
-                                   :text "make me do something interesting"
-                                   :font-family "Verdana"
-                                   :preserve-context t))
+(setc sp can-point :x 51 :y 52)
+(setc ep can-point :x 151 :y 52)
+(setc line can-line :start-point sp :end-point ep)
+(add-to-context can line)
 
 (defun get-public-path ()
   (let ((path-string

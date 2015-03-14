@@ -14,6 +14,13 @@
 ;;     (allowing (with-canvas-string ...))
 ;;     (we probably dont even need defgeneric to allow this macro)
 ;;
+;; NOTES
+;;   - for animation class
+;;     - (wrap-in-function anim js-fn)
+;;     - (run-on-click anim id-of-dom-node)
+;;     - (run-on-key-press anim key)
+;;     - support #\C as arg with #'char-to-key-code
+;;
 (in-package :cl-canvas)
 
 ;; setclass
@@ -77,9 +84,6 @@
        do
          (format str "~A~%" (element-to-string elt)))))
 
-;; if we often want to be printing to a string
-;; for use as part of a parameter list, creating
-;; then make an element-to-string
 (defclass can-point ()
   ((x :initarg :x
       :initform 0
@@ -87,6 +91,12 @@
    (y :initarg :y
       :initform 0
       :accessor get-y)))
+
+(defmethod to-param-string ((p can-point))
+  (with-output-to-string (str)
+    (let ((x (write-to-string (get-x p)))
+          (y (write-to-string (get-y p))))
+      (format str "~A, ~A" x y))))
 
 ;; adding preserve-context makes me think a context-element
 ;; super class might be in order
@@ -131,6 +141,7 @@
 
 (defmethod element-to-string ((ct can-text))
   (with-output-to-string (str)
+    ;; let preserve-context and avoid code dup
     (if (get-preserve-context ct)
         (format str "context.save();~%"))
     (format str "context.fillStyle = '~A';~%" (get-font-color ct))
@@ -154,4 +165,22 @@
           :accessor get-color)
    (cap :initarg :cap
         :initform "butt"
-        :accessor get-cap)))
+        :accessor get-cap)
+   (preserve-context :initarg :preserve-context
+                     :initform nil
+                     :accessor get-preserve-context)))
+
+(defmethod element-to-string ((cl can-line))
+  (with-output-to-string (str)
+    (let ((pc (get-preserve-context cl)))
+      (if pc
+          (format str "context.save();~%"))
+      (format str "context.beginPath();~%")
+      (format str "context.moveTo(~A);~%" (to-param-string (get-start-point cl)))
+      (format str "context.lineTo(~A);~%" (to-param-string (get-end-point cl)))
+      (format str "context.lineWidth = ~A;~%" (get-width cl))
+      (format str "context.strokeStyle = '~A';~%" (get-color cl))
+      (format str "context.lineCap = '~A';~%" (get-cap cl))
+      (format str "context.stroke();~%")
+      (if pc
+        (format str "context.restore();")))))
