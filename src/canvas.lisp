@@ -76,6 +76,8 @@
        do
          (format str "~A~%" (element-to-string elt)))))
 
+;; adding preserve-context makes me think a context-element
+;; super class might be in order
 (defclass can-text ()
   ((font-pt :initarg :font-pt
             :initform 12
@@ -97,7 +99,10 @@
           :accessor get-x-pos)
    (y-pos :initarg :y-pos
           :initform 30
-          :accessor get-y-pos)))
+          :accessor get-y-pos)
+   (preserve-context :initarg :preserve-context
+                     :initform nil
+                     :accessor get-preserve-context)))
 
 (defmethod build-font-string ((ct can-text))
   (with-output-to-string (str)
@@ -113,6 +118,10 @@
 
 (defmethod element-to-string ((ct can-text))
   (with-output-to-string (str)
+    (if (get-preserve-context ct)
+        (format str "context.save();~%"))
     (format str "context.fillStyle = '~A';~%" (get-font-color ct))
     (format str "context.font = '~A';~%" (build-font-string ct))
-    (format str "context.fillText(~A);~%" (build-fill-text-params ct))))
+    (format str "context.fillText(~A);~%" (build-fill-text-params ct))
+    (if (get-preserve-context ct)
+        (format str "context.restore();"))))

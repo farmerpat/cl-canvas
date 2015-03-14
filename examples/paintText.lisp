@@ -13,7 +13,8 @@
 (setf can (make-instance 'canvas :width 400 :context (make-instance 'context)))
 (add-to-context can (make-instance 'can-text
                                    :text "make me do something interesting"
-                                   :font-family "Verdana"))
+                                   :font-family "Verdana"
+                                   :preserve-context t))
 
 (defun get-public-path ()
   (let ((path-string
