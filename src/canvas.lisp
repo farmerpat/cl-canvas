@@ -5,6 +5,7 @@
 ;;
 ;; TODO
 ;;   - add README.md
+;;   - add compile-to-file
 ;;   - allow &rest args for add-to-context
 ;;   - add docstrings
 ;;   - add error checking to class inits (e.g. (member given-weight '("bold" "normal" "italic")))
@@ -76,6 +77,17 @@
        do
          (format str "~A~%" (element-to-string elt)))))
 
+;; if we often want to be printing to a string
+;; for use as part of a parameter list, creating
+;; then make an element-to-string
+(defclass can-point ()
+  ((x :initarg :x
+      :initform 0
+      :accessor get-x)
+   (y :initarg :y
+      :initform 0
+      :accessor get-y)))
+
 ;; adding preserve-context makes me think a context-element
 ;; super class might be in order
 (defclass can-text ()
@@ -94,6 +106,7 @@
    (text        :initarg :text
                 :initform "lorem ipsum"
                 :accessor get-text)
+   ;; replace with point
    (x-pos :initarg :x-pos
           :initform 30
           :accessor get-x-pos)
@@ -125,3 +138,20 @@
     (format str "context.fillText(~A);~%" (build-fill-text-params ct))
     (if (get-preserve-context ct)
         (format str "context.restore();"))))
+
+(defclass can-line ()
+  ((start-point :initarg :start-point
+                :initform (make-instance 'can-point)
+                :accessor get-start-point)
+   (end-point :initarg :end-point
+              :initform (make-instance 'can-point)
+              :accessor get-end-point)
+   (width :initarg :width
+          :initform 5
+          :accessor get-width)
+   (color :initarg :color
+          :initform "#000000"
+          :accessor get-color)
+   (cap :initarg :cap
+        :initform "butt"
+        :accessor get-cap)))
