@@ -9,10 +9,7 @@
 ;;   - allow &rest args for add-to-context
 ;;   - add docstrings
 ;;   - add error checking to class inits (e.g. (member given-weight '("bold" "normal" "italic")))
-;;   - integrate global *fill-color* for default or override?
 ;;   - add stroke-color to can-text?
-;;     (allowing (with-canvas-string ...))
-;;     (we probably dont even need defgeneric to allow this macro)
 ;;
 ;; NOTES
 ;;   - for animation class
@@ -45,13 +42,16 @@
           :accessor get-width)
    (height :initarg :height
            :initform 200
-           :accessor get-height)))
+           :accessor get-height)
+   (tag-id :initarg :tag-id
+       :initform "canvas"
+       :accessor get-tag-id)))
 
 (defmethod canvas-area-spec-string ((c canvas))
   (let ((width (write-to-string (get-width c)))
         (height (write-to-string (get-height c))))
     (with-output-to-string (str)
-      (format str "var canvas = document.getElementById('canvas');~%")
+      (format str "var canvas = document.getElementById('~A');~%" (get-tag-id c))
       (format str "canvas.width='~A';~%" width)
       (format str "canvas.height='~A';~%" height))))
 
