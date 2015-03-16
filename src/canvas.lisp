@@ -39,6 +39,13 @@
 (defmacro mi (class &rest initargs)
   `(make-instance ',class ,@initargs))
 
+(defmacro write-with-pc-wrap ((obj str) &rest body)
+  `(with-output-to-string (,str)
+     (let ((pc (get-preserve-context ,obj)))
+       (if pc (format ,str "context.save();~%"))
+       ,@body
+       (if pc (format ,str "context.restore();~%")))))
+
 (defun can-line (line)
   (format nil "~A~%" line))
 
@@ -150,15 +157,10 @@
     (format str "~A" (get-y-pos ct))))
 
 (defmethod element-to-string ((ct can-text))
-  (with-output-to-string (str)
-    ;; let preserve-context and avoid code dup
-    (if (get-preserve-context ct)
-        (format str "context.save();~%"))
+  (write-with-pc-wrap (ct str)
     (format str "context.fillStyle = '~A';~%" (get-font-color ct))
     (format str "context.font = '~A';~%" (build-font-string ct))
-    (format str "context.fillText(~A);~%" (build-fill-text-params ct))
-    (if (get-preserve-context ct)
-        (format str "context.restore();"))))
+    (format str "context.fillText(~A);~%" (build-fill-text-params ct))))
 
 (defclass can-line ()
   ((start-point :initarg :start-point
@@ -181,19 +183,14 @@
                      :accessor get-preserve-context)))
 
 (defmethod element-to-string ((cl can-line))
-  (with-output-to-string (str)
-    (let ((pc (get-preserve-context cl)))
-      (if pc
-          (format str "context.save();~%"))
-      (format str "context.beginPath();~%")
-      (format str "context.moveTo(~A);~%" (to-param-string (get-start-point cl)))
-      (format str "context.lineTo(~A);~%" (to-param-string (get-end-point cl)))
-      (format str "context.lineWidth = ~A;~%" (get-width cl))
-      (format str "context.strokeStyle = '~A';~%" (get-color cl))
-      (format str "context.lineCap = '~A';~%" (get-cap cl))
-      (format str "context.stroke();~%")
-      (if pc
-        (format str "context.restore();")))))
+  (write-with-pc-wrap (cl str)
+    (format str "context.beginPath();~%")
+    (format str "context.moveTo(~A);~%" (to-param-string (get-start-point cl)))
+    (format str "context.lineTo(~A);~%" (to-param-string (get-end-point cl)))
+    (format str "context.lineWidth = ~A;~%" (get-width cl))
+    (format str "context.strokeStyle = '~A';~%" (get-color cl))
+    (format str "context.lineCap = '~A';~%" (get-cap cl))
+    (format str "context.stroke();~%")))
 
 (defclass angle ()
   ((degrees :initarg :degrees
@@ -234,19 +231,14 @@
                      :accessor get-preserve-context)))
 
 (defmethod element-to-string ((a can-arc))
-  (with-output-to-string (str)
-    (let ((pc (get-preserve-context a)))
-      (if pc
-          (format str "context.save();~%"))
-      (format str "context.beginPath();~%")
-      (format str "context.arc(~A);~%" (build-arc-parmas a))
-      (format str "context.lineWidth = ~A;~%" (get-width a))
-      (format str "context.strokeStyle = '~A';~%" (get-color a))
-      (format str "context.stroke();~%")
-      (if pc
-        (format str "context.restore();")))))
+  (write-with-pc-wrap (a str)
+    (format str "context.beginPath();~%")
+    (format str "context.arc(~A);~%" (build-arc-params a))
+    (format str "context.lineWidth = ~A;~%" (get-width a))
+    (format str "context.strokeStyle = '~A';~%" (get-color a))
+    (format str "context.stroke();~%")))
 
-(defmethod build-arc-parmas ((a can-arc))
+(defmethod build-arc-params ((a can-arc))
   (with-output-to-string (str)
     (format str "~A, " (to-param-string (get-center-point a)))
     (format str "~A, " (get-radius a))
@@ -266,16 +258,11 @@
                :accessor get-fill-color)))
 
 (defmethod element-to-string ((c can-circle))
-  (with-output-to-string (str)
-    (let ((pc (get-preserve-context c)))
-      (if pc
-          (format str "context.save();~%"))
-      (format str "context.beginPath();~%")
-      (format str "context.arc(~A);~%" (build-arc-parmas c))
-      (format str "context.fillStyle = '~A';~%" (get-fill-color c))
-      (format str "context.fill();~%")
-      (format str "context.lineWidth = ~A;~%" (get-width c))
-      (format str "context.strokeStyle = '~A';~%" (get-color c))
-      (format str "context.stroke();~%")
-      (if pc
-        (format str "context.restore();")))))
+  (write-with-pc-wrap (c str)
+    (format str "context.beginPath();~%")
+    (format str "context.arc(~A);~%" (build-arc-params c))
+    (format str "context.fillStyle = '~A';~%" (get-fill-color c))
+    (format str "context.fill();~%")
+    (format str "context.lineWidth = ~A;~%" (get-width c))
+    (format str "context.strokeStyle = '~A';~%" (get-color c))
+    (format str "context.stroke();~%")))
