@@ -10,6 +10,8 @@
                 :can-text
                 :can-point
                 :can-line
+                :can-arc
+                :angle
                 :setc
                 :mi)
   (:export :canvas
@@ -19,5 +21,7 @@
            :can-text
            :can-point
            :can-line
+           :can-arc
+           :angle
            :setc
            :mi))

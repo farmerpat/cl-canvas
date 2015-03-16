@@ -10,6 +10,16 @@
 ;;   - add docstrings
 ;;   - add error checking to class inits (e.g. (member given-weight '("bold" "normal" "italic")))
 ;;   - add stroke-color to can-text?
+;;   - consider some kind of relative positioning scheme
+;;     - for example, enabling the user to specify that an object is to be centered
+;;       and the system knowing that (if the obj is a circle) that x = canvas.width / 2;
+;;   - make a super class to hold common slots: preserve-context, color, etc
+;;   - make a descendant of that for shapes (for lineWidth, etc)
+;;   - ***wrap-in-preserve-context macro (including w/output to string)***
+;;   - add circle class
+;;   - add donut class
+;;   - add regular polygon class
+;;   - add plotting?
 ;;
 ;; NOTES
 ;;   - for animation class
@@ -24,8 +34,8 @@
 (defmacro setc (sym class &rest initargs)
   `(setf ,sym (make-instance ',class ,@initargs)))
 
-(defmacro mi (class)
-  `(make-instance ',class))
+(defmacro mi (class &rest initargs)
+  `(make-instance ',class ,@initargs))
 
 (defun can-line (line)
   (format nil "~A~%" line))
@@ -98,8 +108,6 @@
           (y (write-to-string (get-y p))))
       (format str "~A, ~A" x y))))
 
-;; adding preserve-context makes me think a context-element
-;; super class might be in order
 (defclass can-text ()
   ((font-pt :initarg :font-pt
             :initform 12
@@ -184,3 +192,62 @@
       (format str "context.stroke();~%")
       (if pc
         (format str "context.restore();")))))
+
+(defclass angle ()
+  ((degrees :initarg :degrees
+            :initform 0
+            :accessor get-degrees)
+   (radians :initarg :radians
+            :accessor get-radians)))
+
+(defmethod initialize-instance :after ((a angle) &rest args)
+  ;; if user gave rads and degs (or just rads), assume they know what they're doing
+  (if (equal :degrees (car args))
+      (setf (get-radians a) (* (get-degrees a) 0.017453292519943))))
+
+(defclass can-arc ()
+  ((center-point :initarg :center-point
+                 :initform (make-instance 'can-point)
+                 :accessor get-center-point)
+   (radius :initarg :radius
+           :initform 1
+           :accessor get-radius)
+   (start-angle :initarg :start-angle
+                :initform (mi angle :degrees 0)
+                :accessor get-start-angle)
+   (end-angle :initarg :end-angle
+              :initform (mi angle :degrees 180)
+              :accessor get-end-angle)
+   (clockwise :initarg :clockwise
+              :initform t
+              :accessor get-clockwise)
+   (color :initarg :color
+          :initform "#000000"
+          :accessor get-color)
+   (width :initarg :width
+          :initform 10
+          :accessor get-width)
+   (preserve-context :initarg :preserve-context
+                     :initform nil
+                     :accessor get-preserve-context)))
+
+(defmethod element-to-string ((a can-arc))
+  (with-output-to-string (str)
+    (let ((pc (get-preserve-context a)))
+      (if pc
+          (format str "context.save();~%"))
+      (format str "context.beginPath();~%")
+      (format str "context.arc(~A);~%" (build-arc-parmas a))
+      (format str "context.lineWidth = ~A;~%" (get-width a))
+      (format str "context.strokeStyle = '~A';~%" (get-color a))
+      (format str "context.stroke();~%")
+      (if pc
+        (format str "context.restore();")))))
+
+(defmethod build-arc-parmas ((a can-arc))
+  (with-output-to-string (str)
+    (format str "~A, " (to-param-string (get-center-point a)))
+    (format str "~A, " (get-radius a))
+    (format str "~A, " (get-radians (get-start-angle a)))
+    (format str "~A, " (get-radians (get-end-angle a)))
+    (format str "~A" (if (get-clockwise a) "false" "true"))))
