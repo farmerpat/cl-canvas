@@ -38,7 +38,7 @@
 (defmacro mi (class &rest initargs)
   `(make-instance ',class ,@initargs))
 
-(defmacro write-with-pc-wrap ((obj str) &rest body)
+(defmacro write-with-pc-wrap ((obj str) &body body)
   `(with-output-to-string (,str)
      (let ((pc (get-preserve-context ,obj)))
        (if pc (format ,str "context.save();~%"))
