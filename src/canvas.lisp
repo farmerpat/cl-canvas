@@ -15,7 +15,6 @@
 ;;       and the system knowing that (if the obj is a circle) that x = canvas.width / 2;
 ;;   - make a super class to hold common slots: preserve-context, color, etc
 ;;   - make a descendant of that for shapes (for lineWidth, etc)
-;;   - ***wrap-in-preserve-context macro (including w/output to string)***
 ;;   - add circle class
 ;;   - add donut class
 ;;   - add regular polygon class
