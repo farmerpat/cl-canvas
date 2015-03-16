@@ -12,6 +12,7 @@
                 :can-line
                 :can-arc
                 :angle
+                :can-circle
                 :setc
                 :mi)
   (:export :canvas
@@ -23,5 +24,6 @@
            :can-line
            :can-arc
            :angle
+           :can-circle
            :setc
            :mi))

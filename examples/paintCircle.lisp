@@ -1,7 +1,7 @@
-;; paints an arc to the canvas
+;; paints a circle to the canvas
 ;;
 ;; Usage (following (asdf:operate 'asdf:load-op :cl-canvas))
-;;   (in-package :cl-canvas-arc-example)
+;;   (in-package :cl-canvas-circle-example)
 ;;   (start-server)
 ;;   visit localhost:5000
 ;;
@@ -10,21 +10,21 @@
 
 (in-package :cl-canvas-example)
 
-(defpackage cl-canvas-arc-example
+(defpackage cl-canvas-circle-example
   (:use :cl :cl-canvas :cl-canvas-example :clack :cl-who :cl-ppcre))
 
-(in-package :cl-canvas-arc-example)
+(in-package :cl-canvas-circle-example)
 
 (defvar *server* nil)
 (setf (cl-who:html-mode) :html5)
 
 (setc can canvas :width 400 :context (mi context))
-(setf arc (mi can-arc :center-point (mi can-point :x 50 :y 50)
-                      :radius 15
-                      :width 5
-                      :start-angle (mi angle :degrees -15)
-                      :end-angle (mi angle :degrees 300)))
-(add-to-context can arc)
+(setf circ (mi can-circle :center-point (mi can-point :x 70 :y 70)
+                          :radius 50
+                          :color "#33CCFF"
+                          :fill-color "#66FF99"
+                          :width 7))
+(add-to-context can circ)
 
 (defun get-public-path ()
   (let ((path-string

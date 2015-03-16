@@ -20,6 +20,8 @@
 ;;   - add donut class
 ;;   - add regular polygon class
 ;;   - add plotting?
+;;   - ***BREAK OUT INDEX-MAKER AND START/STOP-SERVER INTO A FILE, EXAMPLE.LISP THAT
+;;     ALL THE EXAMPLES DEPEND ON***
 ;;
 ;; NOTES
 ;;   - for animation class
@@ -251,3 +253,29 @@
     (format str "~A, " (get-radians (get-start-angle a)))
     (format str "~A, " (get-radians (get-end-angle a)))
     (format str "~A" (if (get-clockwise a) "false" "true"))))
+
+(defclass can-circle (can-arc)
+  ((start-angle :initform (mi angle :degrees 0)
+                :reader get-start-angle)
+   (end-angle :initform (mi angle :degrees 360)
+              :reader get-end-angle)
+   (clockwise :initform t
+              :reader get-clockwise)
+   (fill-color :initarg :fill-color
+               :initform "#000000"
+               :accessor get-fill-color)))
+
+(defmethod element-to-string ((c can-circle))
+  (with-output-to-string (str)
+    (let ((pc (get-preserve-context c)))
+      (if pc
+          (format str "context.save();~%"))
+      (format str "context.beginPath();~%")
+      (format str "context.arc(~A);~%" (build-arc-parmas c))
+      (format str "context.fillStyle = '~A';~%" (get-fill-color c))
+      (format str "context.fill();~%")
+      (format str "context.lineWidth = ~A;~%" (get-width c))
+      (format str "context.strokeStyle = '~A';~%" (get-color c))
+      (format str "context.stroke();~%")
+      (if pc
+        (format str "context.restore();")))))

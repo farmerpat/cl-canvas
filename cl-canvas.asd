@@ -20,5 +20,6 @@
                         ((:file "package")
                          (:file "paintText" :depends-on ("package"))
                          (:file "paintLine" :depends-on ("package"))
-                         (:file "paintArc" :depends-on ("package")))))
+                         (:file "paintArc" :depends-on ("package"))
+                         (:file "paintCircle" :depends-on ("package")))))
   :description "Indirectly interact with the html5 canvas element via common lisp")
