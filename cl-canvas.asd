@@ -17,9 +17,9 @@
                (:module "examples"
                         :depends-on ("src")
                         :components
-                        ((:file "package")
-                         (:file "paintText" :depends-on ("package"))
-                         (:file "paintLine" :depends-on ("package"))
-                         (:file "paintArc" :depends-on ("package"))
-                         (:file "paintCircle" :depends-on ("package")))))
+                        ((:file "example")
+                         (:file "paintText" :depends-on ("example"))
+                         (:file "paintLine" :depends-on ("example"))
+                         (:file "paintArc" :depends-on ("example"))
+                         (:file "paintCircle" :depends-on ("example")))))
   :description "Indirectly interact with the html5 canvas element via common lisp")
