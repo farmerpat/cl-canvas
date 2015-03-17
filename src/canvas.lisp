@@ -264,3 +264,14 @@
     (format str "context.lineWidth = ~A;~%" (get-width c))
     (format str "context.strokeStyle = '~A';~%" (get-color c))
     (format str "context.stroke();~%")))
+
+(defclass can-donut (can-circle)
+  ())
+
+(defmethod element-to-string ((d can-donut))
+  (write-with-pc-wrap (d str)
+    (format str "context.beginPath();~%")
+    (format str "context.arc(~A);~%" (build-arc-params d))
+    (format str "context.lineWidth = ~A;~%" (get-width d))
+    (format str "context.strokeStyle = '~A';~%" (get-color d))
+    (format str "context.stroke();~%")))

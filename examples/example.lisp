@@ -13,6 +13,7 @@
                 :can-arc
                 :angle
                 :can-circle
+                :can-donut
                 :setc
                 :mi)
   (:export :canvas
@@ -25,6 +26,7 @@
            :can-arc
            :angle
            :can-circle
+           :can-donut
            :setc
            :mi
            :index-maker
