@@ -15,7 +15,6 @@
 ;;       and the system knowing that (if the obj is a circle) that x = canvas.width / 2;
 ;;   - make a super class to hold common slots: preserve-context, color, etc
 ;;   - make a descendant of that for shapes (for lineWidth, etc)
-;;   - add donut class
 ;;   - add regular polygon class
 ;;   - add plotting?
 ;;   - ***BREAK OUT INDEX-MAKER AND START/STOP-SERVER INTO A FILE, EXAMPLE.LISP THAT
