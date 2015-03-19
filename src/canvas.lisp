@@ -13,12 +13,17 @@
 ;;   - consider some kind of relative positioning scheme
 ;;     - for example, enabling the user to specify that an object is to be centered
 ;;       and the system knowing that (if the obj is a circle) that x = canvas.width / 2;
-;;   - make a super class to hold common slots: preserve-context, color, etc
-;;   - make a descendant of that for shapes (for lineWidth, etc)
+;;   - make a super class to hold common slots:
+;;     - preserve-context
+;;     - color
+;;   - make a descendant of that for shapes
+;;     - line-width (call it stroke-width?)
+;;     - fill?
 ;;   - add regular polygon class
 ;;   - add plotting?
 ;;   - ***BREAK OUT INDEX-MAKER AND START/STOP-SERVER INTO A FILE, EXAMPLE.LISP THAT
 ;;     ALL THE EXAMPLES DEPEND ON***
+;;   - probably delete pop-context
 ;;
 ;; NOTES
 ;;   - for animation class
@@ -274,3 +279,70 @@
     (format str "context.lineWidth = ~A;~%" (get-width d))
     (format str "context.strokeStyle = '~A';~%" (get-color d))
     (format str "context.stroke();~%")))
+
+(defclass can-path ()
+  ((point-list :initarg :point-list
+               :initform ()
+               :accessor get-point-list)
+   (line-width :initarg :line-width
+               :initform 5
+               :accessor get-line-width)
+   (color :initarg :color
+          :initform "#9966FF")
+   (join-style :initarg :join-style
+               :initform "miter"
+               :accessor get-join-style)
+   (closed :initarg :closed
+           :initform nil
+           :accessor get-closed)
+   (preserve-context :initarg :preserve-context
+                     :initform nil
+                     :accessor get-preserve-context))
+  (:documentation "draws a path given a list of three or more points"))
+
+(defmethod element-to-string ((p can-path ))
+  (write-with-pc-wrap (p str)
+    (let* ((first-node (car (get-point-list p)))
+           (first-x (get-x first-node))
+           (first-y (get-y first-node)))
+      (format str "context.beginPath();~%")
+      (format str "context.moveTo(~A, ~A);~%" first-x first-y)
+      (dolist (point (rest (get-point-list p)))
+        (format str "context.lineTo(~A, ~A);~%" (get-x point) (get-y point)))
+      (if (get-closed p)
+          (format str "context.lineTo(~A, ~A);~%" first-x first-y))
+      (format str "context.lineJoin = '~A';~%" (get-join-style p))
+      (format str "context.stroke();~%"))))
+
+(defclass can-polygon ()
+  ((num-sides :initarg :num-sides
+              :initform 3
+              :accessor get-num-sides)
+   (interior-angles :initarg :interior-angles
+                    :initform ()
+                    :accessor get-interior-angles)
+   (side-lengths :initarg :side-lengths
+                 :initform ()
+                 :accessor get-side-lengths)
+   (preserve-context :initarg :preserve-context
+                     :initform nil
+                     :accessor get-preserve-context)))
+
+(defclass can-regular-polygon (can-polygon)
+  ((center-point :reader get-center-point)
+   (side-length :initarg :side-length
+                :initform 5
+                :accessor get-side-length)
+   (interior-angle :accessor get-interior-angle)))
+
+(defmethod initialize-instance :after ((p can-regular-polygon) &rest args)
+  (let ((int-ang (calculate-interior-angle p)))
+    (format t "int-ang: ~A~%" (get-degrees int-ang))
+    (format t "int-ang: ~A~%" (get-radians int-ang))
+    (setf (get-interior-angle p) int-ang)))
+
+(defmethod calculate-interior-angle ((p can-polygon))
+  (let* ((n (get-num-sides p))
+         (degs (* (- n 2) (/ 180.0 n))))
+    (format t "in calc-int~%")
+    (mi angle :degrees degs)))
