@@ -43,7 +43,7 @@
   #'(lambda (env)
       `(200
         (:content-type "text/html")
-        (,(with-html-output-to-string (str nil :prologue t :indent t)
+        (,(with-html-output-to-string (str nil :prologue "<!doctype html>" :indent t)
             (:html
              (:head
               (:link :rel "stylesheet" :type "text/css" :href "/public/css/style.css"))
