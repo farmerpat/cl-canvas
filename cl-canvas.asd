@@ -22,5 +22,6 @@
                          (:file "paintLine" :depends-on ("example"))
                          (:file "paintArc" :depends-on ("example"))
                          (:file "paintCircle" :depends-on ("example"))
-                         (:file "paintDonut" :depends-on ("example")))))
+                         (:file "paintDonut" :depends-on ("example"))
+                         (:file "paintPoly" :depends-on ("example")))))
   :description "Indirectly interact with the html5 canvas element via common lisp")

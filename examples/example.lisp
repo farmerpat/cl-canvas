@@ -14,6 +14,9 @@
                 :angle
                 :can-circle
                 :can-donut
+                :can-path
+                :can-polygon
+                :can-regular-polygon
                 :setc
                 :mi)
   (:export :canvas
@@ -27,6 +30,9 @@
            :angle
            :can-circle
            :can-donut
+           :can-path
+           :can-polygon
+           :can-regular-polygon
            :setc
            :mi
            :index-maker

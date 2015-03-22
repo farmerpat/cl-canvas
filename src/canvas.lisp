@@ -4,6 +4,10 @@
 ;; see http://www.html5canvastutorials.com/tutorials/ for functionality to offer
 ;;
 ;; TODO
+;;   - add line-width to path and polygons
+;;   - add fill to closed path and polygons
+;;   - add rotation in general (e.g. to make polys "right side up")
+;;   - can probably remove the whole first-point bit from generate-path and make the path closed instead
 ;;   - add README.md
 ;;   - add compile-to-file
 ;;   - allow &rest args for add-to-context
@@ -288,7 +292,8 @@
                :initform 5
                :accessor get-line-width)
    (color :initarg :color
-          :initform "#9966FF")
+          :initform "#9966FF"
+          :accessor get-color)
    (join-style :initarg :join-style
                :initform "miter"
                :accessor get-join-style)
@@ -312,6 +317,7 @@
       (if (get-closed p)
           (format str "context.lineTo(~A, ~A);~%" first-x first-y))
       (format str "context.lineJoin = '~A';~%" (get-join-style p))
+      (format str "context.strokeStyle = '~A';~%" (get-color p))
       (format str "context.stroke();~%"))))
 
 (defclass can-polygon ()
@@ -329,20 +335,56 @@
                      :accessor get-preserve-context)))
 
 (defclass can-regular-polygon (can-polygon)
-  ((center-point :reader get-center-point)
+  ((center-point :initarg :center-point
+                 :initform (mi can-point)
+                 :reader get-center-point)
    (side-length :initarg :side-length
                 :initform 5
                 :accessor get-side-length)
-   (interior-angle :accessor get-interior-angle)))
-
-(defmethod initialize-instance :after ((p can-regular-polygon) &rest args)
-  (let ((int-ang (calculate-interior-angle p)))
-    (format t "int-ang: ~A~%" (get-degrees int-ang))
-    (format t "int-ang: ~A~%" (get-radians int-ang))
-    (setf (get-interior-angle p) int-ang)))
+   (interior-angle :accessor get-interior-angle)
+   (apothem :accessor get-apothem)
+   (path :accessor get-path))
+  (:documentation "regular, convex polygons"))
 
 (defmethod calculate-interior-angle ((p can-polygon))
   (let* ((n (get-num-sides p))
          (degs (* (- n 2) (/ 180.0 n))))
     (format t "in calc-int~%")
     (mi angle :degrees degs)))
+
+;; create deg-to-rad function to avoid gross number
+(defmethod calculate-apothem ((p can-regular-polygon))
+  (/ (* .5 (get-side-length p))
+     (tan (* 0.0174532925 (/ 180.0 (get-num-sides p))))))
+
+(defmethod initialize-instance :after ((p can-regular-polygon) &rest args)
+  (setf (get-interior-angle p) (calculate-interior-angle p))
+  (setf (get-apothem p) (calculate-apothem p))
+  (setf (get-path p) (generate-path p)))
+
+;; make tolerance an optional paramter w/ default
+(defun make-zero-if-almost-zero (n)
+  (let ((tolerance 0.00000000000001))
+    (if (< (abs n) tolerance)
+        0.0
+        n)))
+
+(defmethod generate-path ((p can-regular-polygon))
+  (let ((points ())
+        (first-point)
+        (x-cent (get-x (get-center-point p)))
+        (y-cent (get-y (get-center-point p)))
+        (side-len (get-side-length p))
+        (num-sides (get-num-sides p)))
+    (dotimes (i (get-num-sides p))
+      (let* ((new-x (make-zero-if-almost-zero (+ x-cent (* side-len (cos (/ (* i 2 pi) num-sides))))))
+             (new-y (make-zero-if-almost-zero (+ y-cent (* side-len (sin (/ (* i 2 pi) num-sides))))))
+             (point (mi can-point :x (coerce new-x 'float) :y (coerce new-y 'float))))
+        (if (= i 0)
+            (setf first-point point))
+        (push point points)))
+    (let ((result (reverse (cons first-point points))))
+      (mi can-path :point-list result))))
+
+(defmethod element-to-string ((p can-regular-polygon))
+  (element-to-string (get-path p)))
